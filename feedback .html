@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生周学习反馈系统 | 在线版+历史记录</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        .container {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h2 {
+            text-align: center;
+            color: #2d4054;
+            margin-bottom: 10px;
+        }
+        .desc {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        .section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .form-item {
+            margin: 16px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+            font-size: 15px;
+        }
+        input, select {
+            width: 100%;
+            padding: 11px 14px;
+            font-size: 16px;
+            border: 1px solid #e5e6eb;
+            border-radius: 8px;
+            outline: none;
+        }
+        input:focus, select:focus {
+            border-color: #409eff;
+            box-shadow: 0 0 0 3px rgba(64,158,255,0.1);
+        }
+        .name-op {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+            transition: 0.2s;
+        }
+        .btn-add {
+            background: #409eff;
+            color: #fff;
+        }
+        .btn-del {
+            background: #f56c6c;
+            color: #fff;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .btn-generate {
+            flex: 1;
+            padding: 12px;
+            background: #409eff;
+            color: #fff;
+            font-size: 16px;
+        }
+        .btn-reset {
+            flex: 1;
+            padding: 12px;
+            background: #909399;
+            color: #fff;
+            font-size: 16px;
+        }
+        .btn-copy {
+            width: 100%;
+            padding: 12px;
+            background: #67c23a;
+            color: #fff;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+            margin-bottom: 20px;
+        }
+        .result-box {
+            padding: 20px;
+            background: #f0f7ff;
+            border-radius: 10px;
+            line-height: 1.8;
+            font-size: 15px;
+            color: #333;
+            display: none;
+            margin-bottom: 20px;
+        }
+        /* 历史记录样式 */
+        .history-title {
+            font-size: 18px;
+            color: #2d4054;
+            margin: 30px 0 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-clear-all {
+            background: #ff7875;
+            color: #fff;
+        }
+        .history-item {
+            padding: 15px;
+            background: #f9fafc;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid #409eff;
+        }
+        .history-head {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+        .history-content {
+            line-height: 1.7;
+            font-size: 14px;
+            color: #333;
+        }
+        .history-del {
+            color: #f56c6c;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .empty-tip {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>学生周学习情况反馈系统</h2>
+        <p class="desc">学生名单+历史记录永久保存 | 支持在线/离线使用</p>
+
+        <!-- 学生名单管理区域 -->
+        <div class="section">
+            <div class="form-item">
+                <label>选择学生</label>
+                <select id="studentSelect"></select>
+                <div class="name-op">
+                    <input type="text" id="newName" placeholder="输入姓名添加到名单">
+                    <button class="btn btn-add" onclick="addStudent()">添加</button>
+                    <button class="btn btn-del" onclick="delStudent()">删除选中</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 评价选项区域 -->
+        <div class="section">
+            <div class="form-item">
+                <label>作业完成情况</label>
+                <select id="homework">
+                    <option value="优秀">优秀</option>
+                    <option value="良好">良好</option>
+                    <option value="一般">一般</option>
+                    <option value="较差">较差</option>
+                </select>
+            </div>
+            <div class="form-item">
+                <label>听写完成情况</label>
+                <select id="dictation">
+                    <option value="优秀">优秀</option>
+                    <option value="良好">良好</option>
+                    <option value="一般">一般</option>
+                    <option value="较差">较差</option>
+                </select>
+            </div>
+            <div class="form-item">
+                <label>出勤情况</label>
+                <select id="attendance">
+                    <option value="全勤">全勤</option>
+                    <option value="偶尔迟到">偶尔迟到</option>
+                    <option value="经常请假">经常请假</option>
+                </select>
+            </div>
+            <div class="form-item">
+                <label>课堂表现</label>
+                <select id="performance">
+                    <option value="优秀">优秀</option>
+                    <option value="良好">良好</option>
+                    <option value="一般">一般</option>
+                    <option value="较差">较差</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 功能按钮 -->
+        <div class="btn-group">
+            <button class="btn-generate" onclick="createFeedback()">生成评语并保存记录</button>
+            <button class="btn-reset" onclick="resetAll()">重置选项</button>
+        </div>
+
+        <!-- 生成结果区域 -->
+        <div class="result-box" id="resultBox"></div>
+        <button class="btn-copy" id="copyBtn" onclick="copyText()">一键复制评语</button>
+
+        <!-- 历史记录区域 -->
+        <div class="history-title">
+            <span>📋 历史反馈记录</span>
+            <button class="btn btn-clear-all" onclick="clearAllHistory()">清空全部记录</button>
+        </div>
+        <div id="historyList"></div>
+    </div>
+
+<script>
+    // 本地存储Key
+    const STUDENT_KEY = "studentList";
+    const HISTORY_KEY = "feedbackHistory";
+
+    // ========== 学生名单管理 ==========
+    let studentList = JSON.parse(localStorage.getItem(STUDENT_KEY)) || [];
+    // 初始化学生下拉框
+    function initStudentSelect() {
+        const sel = document.getElementById("studentSelect");
+        sel.innerHTML = '<option value="">-- 请选择学生 --</option>';
+        studentList.forEach(name => {
+            const opt = document.createElement("option");
+            opt.value = name;
+            opt.innerText = name;
+            sel.appendChild(opt);
+        });
+    }
+    // 添加学生
+    function addStudent() {
+        const val = document.getElementById("newName").value.trim();
+        if (!val) return alert("请输入学生姓名");
+        if (studentList.includes(val)) return alert("该学生已存在");
+        studentList.push(val);
+        localStorage.setItem(STUDENT_KEY, JSON.stringify(studentList));
+        initStudentSelect();
+        document.getElementById("newName").value = "";
+    }
+    // 删除学生
+    function delStudent() {
+        const sel = document.getElementById("studentSelect");
+        const name = sel.value;
+        if (!name) return alert("请先选中学生");
+        studentList = studentList.filter(item => item !== name);
+        localStorage.setItem(STUDENT_KEY, JSON.stringify(studentList));
+        initStudentSelect();
+    }
+
+    // ========== 历史记录管理 ==========
+    let historyData = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+    // 渲染历史记录
+    function renderHistory() {
+        const wrap = document.getElementById("historyList");
+        if (historyData.length === 0) {
+            wrap.innerHTML = '<div class="empty-tip">暂无历史记录</div>';
+            return;
+        }
+        let html = "";
+        historyData.forEach((item, index) => {
+            html += `
+                <div class="history-item">
+                    <div class="history-head">
+                        <span>${item.time} | ${item.name}</span>
+                        <span class="history-del" onclick="delHistory(${index})">删除本条</span>
+                    </div>
+                    <div class="history-content">${item.content}</div>
+                </div>
+            `;
+        });
+        wrap.innerHTML = html;
+    }
+    // 删除单条历史
+    function delHistory(index) {
+        historyData.splice(index, 1);
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(historyData));
+        renderHistory();
+    }
+    // 清空全部历史
+    function clearAllHistory() {
+        if (!confirm("确定要清空所有历史记录吗？此操作不可恢复！")) return;
+        historyData = [];
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(historyData));
+        renderHistory();
+    }
+    // 新增一条历史记录
+    function addHistory(name, content) {
+        const now = new Date();
+        const timeStr = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}`;
+        historyData.unshift({
+            name: name,
+            time: timeStr,
+            content: content
+        });
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(historyData));
+        renderHistory();
+    }
+
+    // ========== 评语库 ==========
+    const goodWords = [
+        "本周{name}整体表现十分出色。作业完成认真工整，质量出众；听写知识点掌握扎实，正确率很高；本周做到全勤，纪律意识良好；课堂上专注投入，积极思考发言。希望你继续保持这份认真，不要满足于当下成绩，主动挑战更高目标，不断突破自我，变得更加优秀。",
+        "本周{name}学习状态在线，各方面表现优异。作业按时保质完成，态度端正；听写落实到位，基础牢固；全程全勤无缺勤，作息规律；课堂思维活跃，紧跟教学节奏。愿你戒骄戒躁，树立更高的学习标准，持续深耕知识，稳步向前。",
+        "{name}本周综合表现值得表扬。作业书写规范、完成度高；听写练习完成得很好，积累效果明显；坚持全勤到校，遵守班级规定；课堂专心听讲，主动参与互动。希望你再接再厉，拓展学习广度与深度，朝着更高的目标努力前行。"
+    ];
+    const normalWords = [
+        "本周{name}整体表现平稳。作业能够按时完成，但细节还有提升空间；听写基本达标，部分内容仍需加强巩固；{attendDesc}；课堂表现中规中矩，主动发言不多。你有不错的基础，若能再多一份细心与主动，查漏补缺，学习效果一定会更好。",
+        "本周{name}能完成基本学习任务。作业整体合格，偶尔存在粗心问题；听写水平中等，需要多加复习；{attendDesc}；课堂可以跟上进度，但专注力偶有松懈。希望你提高自我要求，端正态度，积极参与课堂，逐步提升综合表现。",
+        "{name}本周状态比较稳定。作业完成情况尚可，仍有精进空间；听写内容基本掌握，需反复练习强化；{attendDesc}；课堂能够遵守纪律，但互动积极性不足。望你查漏补缺，改掉小缺点，争取每周都有新进步。"
+    ];
+    const badWords = [
+        "本周{name}学习状态有待改善。作业完成质量偏低，存在拖延或敷衍情况；听写掌握不够扎实，错题较多；{attendDesc}；课堂注意力不够集中，参与度较低。老师相信你有潜力，希望及时调整状态，严格要求自己，踏实完成各项任务，努力追赶进度。",
+        "本周{name}多项学习任务完成不佳。作业落实不到位，需要多加用心；听写效果不理想，基础较为薄弱；{attendDesc}；课堂比较散漫，没有全身心投入。暂时落后不用气馁，从现在开始端正态度，一步一个脚印补齐短板，老师期待你的改变。",
+        "{name}本周表现不够理想。作业态度松懈，完成情况较差；听写未能达到要求，课后缺少复盘；{attendDesc}；课堂听课效率不高。希望你正视问题，克服惰性，认真对待每一项学习内容，专注课堂，用行动换来进步。"
+    ];
+    // 出勤描述转换
+    function getAttendText(attend) {
+        if(attend === "全勤") return "本周坚持全勤，出勤情况良好";
+        if(attend === "偶尔迟到") return "本周有偶尔迟到的情况，还需加强时间观念";
+        if(attend === "经常请假") return "本周经常请假，一定程度影响了正常学习进度";
+        return "";
+    }
+    // 随机选取评语
+    function getRandom(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    // ========== 生成评语主逻辑 ==========
+    function createFeedback() {
+        const name = document.getElementById("studentSelect").value;
+        if (!name) return alert("请先选择学生姓名");
+        const homework = document.getElementById("homework").value;
+        const dictation = document.getElementById("dictation").value;
+        const attendance = document.getElementById("attendance").value;
+        const performance = document.getElementById("performance").value;
+        const attendDesc = getAttendText(attendance);
+
+        let content = "";
+        if(homework === "优秀" && dictation === "优秀" && performance === "优秀" && attendance === "全勤"){
+            content = getRandom(goodWords).replace(/{name}/g, name);
+        } else if(homework === "较差" || dictation === "较差" || performance === "较差"){
+            content = getRandom(badWords).replace(/{name}/g, name).replace(/{attendDesc}/g, attendDesc);
+        } else {
+            content = getRandom(normalWords).replace(/{name}/g, name).replace(/{attendDesc}/g, attendDesc);
+        }
+
+        // 展示结果
+        const resultBox = document.getElementById("resultBox");
+        const copyBtn = document.getElementById("copyBtn");
+        resultBox.innerText = content;
+        resultBox.style.display = "block";
+        copyBtn.style.display = "block";
+
+        // 保存到历史记录
+        addHistory(name, content);
+    }
+
+    // 复制文本
+    function copyText() {
+        const text = document.getElementById("resultBox").innerText;
+        navigator.clipboard.writeText(text).then(()=>{
+            alert("✅ 复制成功！");
+        }).catch(()=>{
+            alert("复制失败，请手动复制文本");
+        });
+    }
+
+    // 重置所有选项
+    function resetAll() {
+        document.getElementById("studentSelect").selectedIndex = 0;
+        document.getElementById("homework").selectedIndex = 0;
+        document.getElementById("dictation").selectedIndex = 0;
+        document.getElementById("attendance").selectedIndex = 0;
+        document.getElementById("performance").selectedIndex = 0;
+        document.getElementById("resultBox").style.display = "none";
+        document.getElementById("copyBtn").style.display = "none";
+        document.getElementById("newName").value = "";
+    }
+
+    // 页面初始化
+    window.onload = function() {
+        initStudentSelect();
+        renderHistory();
+    }
+</script>
+</body>
+</html>
